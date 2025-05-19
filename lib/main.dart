@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';
-
 import 'app.dart';
 import 'providers/task_provider.dart';
 import 'providers/project_provider.dart';
@@ -15,6 +14,7 @@ import 'models/project.dart';
 import 'models/habit.dart';
 import 'screens/home_screen.dart';
 import 'utils/icon_generator.dart';
+import 'services/notification_service.dart';
 
 
 void main() async {
@@ -55,6 +55,9 @@ void main() async {
   await Hive.openBox<Task>('tasks');
   await Hive.openBox<Project>('projects');
   await Hive.openBox<Habit>('habits');
+  
+  // Initialize notification service
+  await NotificationService().init();
   
   // Generate the app icon
   await IconGenerator.generateAppIcon();

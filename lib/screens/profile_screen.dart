@@ -8,7 +8,6 @@ import '../providers/user_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/habit_provider.dart';
-import '../widgets/app_drawer.dart';
 import '../theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {

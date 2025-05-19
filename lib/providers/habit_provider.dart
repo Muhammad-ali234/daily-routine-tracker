@@ -3,11 +3,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/habit.dart';
+import '../services/notification_service.dart';
 
 class HabitProvider with ChangeNotifier {
   Box<Habit>? _habitsBox;
   List<Habit> _habits = [];
   bool _isInitialized = false;
+  final NotificationService _notificationService = NotificationService();
 
   HabitProvider() {
     _initBox();
@@ -65,6 +67,12 @@ class HabitProvider with ChangeNotifier {
     );
     
     await _habitsBox!.put(id, newHabit);
+    
+    // Schedule notifications for the habit
+    if (newHabit.startTime != null) {
+      await _notificationService.scheduleWeeklyHabitNotifications(newHabit);
+    }
+    
     _loadHabits();
   }
 
@@ -78,6 +86,13 @@ class HabitProvider with ChangeNotifier {
     }
 
     await _habitsBox!.put(habit.id, habit);
+    
+    // Cancel existing notifications and reschedule
+    await _notificationService.cancelNotificationForHabit(habit);
+    if (habit.startTime != null) {
+      await _notificationService.scheduleWeeklyHabitNotifications(habit);
+    }
+    
     _loadHabits();
   }
 
@@ -90,7 +105,13 @@ class HabitProvider with ChangeNotifier {
       throw Exception('Habits box not initialized');
     }
 
-    await _habitsBox!.delete(id);
+    final habit = _habitsBox!.get(id);
+    if (habit != null) {
+      // Cancel notifications for the habit
+      await _notificationService.cancelNotificationForHabit(habit);
+      await _habitsBox!.delete(id);
+    }
+    
     _loadHabits();
   }
 
@@ -105,26 +126,35 @@ class HabitProvider with ChangeNotifier {
 
     final habit = _habitsBox!.get(id);
     if (habit != null) {
+      bool previousState = false;
+      
       switch (day.toLowerCase()) {
         case 'monday':
+          previousState = habit.monday;
           habit.monday = !habit.monday;
           break;
         case 'tuesday':
+          previousState = habit.tuesday;
           habit.tuesday = !habit.tuesday;
           break;
         case 'wednesday':
+          previousState = habit.wednesday;
           habit.wednesday = !habit.wednesday;
           break;
         case 'thursday':
+          previousState = habit.thursday;
           habit.thursday = !habit.thursday;
           break;
         case 'friday':
+          previousState = habit.friday;
           habit.friday = !habit.friday;
           break;
         case 'saturday':
+          previousState = habit.saturday;
           habit.saturday = !habit.saturday;
           break;
         case 'sunday':
+          previousState = habit.sunday;
           habit.sunday = !habit.sunday;
           break;
       }
@@ -133,6 +163,15 @@ class HabitProvider with ChangeNotifier {
       _updateStreaks(habit);
       
       await _habitsBox!.put(id, habit);
+      
+      // Cancel and reschedule notifications if the day pattern changed
+      if (habit.startTime != null) {
+        // If the habit was toggled off for the day, cancel that day's notification
+        // If it was toggled on, schedule a notification if time hasn't passed
+        await _notificationService.cancelNotificationForHabit(habit);
+        await _notificationService.scheduleWeeklyHabitNotifications(habit);
+      }
+      
       _loadHabits();
     }
   }

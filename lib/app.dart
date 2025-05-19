@@ -8,6 +8,7 @@ import 'screens/habit_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/setting_screen.dart';
+import 'screens/notification_test_screen.dart';
 import 'theme/app_theme.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
@@ -61,6 +62,7 @@ class ProductivityApp extends StatelessWidget {
               ),
             ),
             themeMode: themeMode,
+            debugShowCheckedModeBanner: false,
             initialRoute: '/',
             routes: {
               '/': (context) => const HomeScreen(),
@@ -70,6 +72,7 @@ class ProductivityApp extends StatelessWidget {
               '/analytics': (context) => const AnalyticsScreen(),
               '/profile': (context) => const ProfileScreen(),
               '/settings': (context) => const SettingsScreen(),
+              '/notifications': (context) => const NotificationTestScreen(),
             },
             onUnknownRoute: (settings) => MaterialPageRoute(
               builder: (context) => const Scaffold(

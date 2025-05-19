@@ -7,7 +7,6 @@ import '../models/project.dart';
 import '../providers/project_provider.dart';
 import '../providers/task_provider.dart';
 import '../theme/app_theme.dart';
-import '../widgets/app_drawer.dart';
 import '../screens/home_screen.dart';
 
 class ProjectScreen extends StatefulWidget {

@@ -90,6 +90,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
             },
           ),
+          ListTile(
+            title: const Text('Test Notifications'),
+            subtitle: const Text('Test and manage app notifications'),
+            leading: const Icon(Icons.notifications_active),
+            onTap: () {
+              Navigator.of(context).pushNamed('/notifications');
+            },
+          ),
           const Divider(),
           
           const _SectionHeader(title: 'Reports'),
