@@ -31,9 +31,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    _nameController = TextEditingController(text: userProvider.user?.name);
-    _emailController = TextEditingController(text: userProvider.user?.email);
-    _bioController = TextEditingController(text: userProvider.user?.bio);
+    _nameController = TextEditingController(text: userProvider.user.name);
+    _emailController = TextEditingController(text: userProvider.user.email);
+    _bioController = TextEditingController(text: userProvider.user.bio);
   }
 
   @override
@@ -75,13 +75,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      drawer: const AppDrawer(),
+    
       body: Consumer4<UserProvider, TaskProvider, ProjectProvider, HabitProvider>(
         builder: (context, userProvider, taskProvider, projectProvider, habitProvider, child) {
           final user = userProvider.user;
-          if (user == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -301,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildPreferences(UserProvider userProvider) {
-    final preferences = userProvider.user?.preferences ?? {};
+    final preferences = userProvider.user.preferences ?? {};
     final dailyTaskGoal = preferences['dailyTaskGoal'] as int? ?? 5;
     final workStartTime = preferences['workStartTime'] as String? ?? '09:00';
     final workEndTime = preferences['workEndTime'] as String? ?? '17:00';

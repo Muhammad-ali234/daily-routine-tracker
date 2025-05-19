@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Colors
-  static const primaryColor = Color(0xFF4A6FFF);
-  static const secondaryColor = Color(0xFF6E88FF);
+  static const primaryColor = Color(0xFF7B42F6); // Unified purple
+  static const secondaryColor = Color(0xFFB01EFF); // Gradient end purple
   static const accentColor = Color(0xFF39D353);
   static const backgroundColor = Color(0xFFF5F7FA);
   static const darkBackgroundColor = Color(0xFF121212);
@@ -45,9 +45,16 @@ class AppTheme {
       brightness: Brightness.light,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: primaryColor,
+      backgroundColor: primaryColor, // Use unified purple
       foregroundColor: Colors.white,
       elevation: 0,
+      iconTheme: IconThemeData(color: Colors.white),
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Poppins',
+      ),
     ),
     scaffoldBackgroundColor: backgroundColor,
     cardTheme: CardTheme(
@@ -177,9 +184,16 @@ class AppTheme {
       brightness: Brightness.dark,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: darkCardColor,
-      foregroundColor: darkTextColor,
+      backgroundColor: primaryColor, // Use unified purple for dark as well
+      foregroundColor: Colors.white,
       elevation: 0,
+      iconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Poppins',
+      ),
     ),
     scaffoldBackgroundColor: darkBackgroundColor,
     cardTheme: CardTheme(

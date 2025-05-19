@@ -147,10 +147,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           
           const _SectionHeader(title: 'About'),
-          ListTile(
-            title: const Text('App Version'),
-            subtitle: const Text('1.0.0'),
-            leading: const Icon(Icons.info),
+          const ListTile(
+            title: Text('App Version'),
+            subtitle: Text('1.0.0'),
+            leading: Icon(Icons.info),
           ),
           ListTile(
             title: const Text('Privacy Policy'),

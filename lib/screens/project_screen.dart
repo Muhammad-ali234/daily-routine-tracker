@@ -8,6 +8,7 @@ import '../providers/project_provider.dart';
 import '../providers/task_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
+import '../screens/home_screen.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({Key? key}) : super(key: key);
@@ -47,7 +48,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
           ),
         ],
       ),
-      drawer: const AppDrawer(),
+
       body: Column(
         children: [
           _buildSearchBar(),
@@ -59,8 +60,8 @@ class _ProjectScreenState extends State<ProjectScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddProjectDialog(context),
-        child: const Icon(Icons.add),
         tooltip: 'Add new project',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -293,6 +294,33 @@ class _ProjectScreenState extends State<ProjectScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            tooltip: 'Delete Project',
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Delete Project'),
+                                  content: Text('Are you sure you want to delete "${project.name}"?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Provider.of<ProjectProvider>(context, listen: false).deleteProject(project.id);
+                                        Navigator.of(context).pop();
+                                      },
+                                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

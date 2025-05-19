@@ -89,11 +89,22 @@ class HabitTracker extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: _getCategoryColor(habit.category),
-              child: const Icon(Icons.repeat, color: Colors.white),
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: completed ? AppTheme.primaryColor : Colors.transparent,
+                border: Border.all(
+                  color: AppTheme.primaryColor,
+                  width: 2,
+                ),
+              ),
+              child: completed 
+                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                : null,
             ),
-            const SizedBox(width: 16.0),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,30 +112,50 @@ class HabitTracker extends StatelessWidget {
                   Text(
                     habit.name,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    'Current streak: ${habit.currentStreak} days',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
+                  if (habit.startTime != null && habit.endTime != null)
+                    Text(
+                      '${habit.startTime!.format(context)} - ${habit.endTime!.format(context)}',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
-            Checkbox(
-              value: completed,
-              onChanged: (value) {
-                Provider.of<HabitProvider>(context, listen: false).toggleHabitForDay(habit.id, today);
+            InkWell(
+              onTap: () {
+                _toggleHabitCompletion(context, habit, today);
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: completed 
+                    ? AppTheme.primaryColor.withOpacity(0.1)
+                    : AppTheme.secondaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  completed ? 'Completed' : 'Mark Complete',
+                  style: TextStyle(
+                    color: completed ? AppTheme.primaryColor : AppTheme.secondaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _toggleHabitCompletion(BuildContext context, Habit habit, String today) {
+    Provider.of<HabitProvider>(context, listen: false).toggleHabitForDay(habit.id, today);
   }
 
   Color _getCategoryColor(HabitCategory category) {

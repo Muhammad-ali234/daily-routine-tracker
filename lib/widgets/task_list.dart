@@ -82,66 +82,68 @@ class TaskList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Text(
                             task.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                            style: const TextStyle(
                               fontSize: 16,
-                              decoration: task.completed ? TextDecoration.lineThrough : null,
+                              fontWeight: FontWeight.bold,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (task.startTime != null && task.endTime != null)
+                          Text(
+                            '${task.startTime!.format(context)} - ${task.endTime!.format(context)}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4.0),
+                    Row(
+                      children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
                           decoration: BoxDecoration(
-                            color: priorityColor.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4.0),
+                            color: priorityColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             task.priority.toString().split('.').last,
                             style: TextStyle(
                               color: priorityColor,
                               fontSize: 12,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          task.timeBlock.toString().split('.').last,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
+                        const SizedBox(width: 8.0),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
                           ),
-                        ),
-                        if (task.dueDate != null)
-                          Text(
-                            DateFormat('MMM dd').format(task.dueDate!),
-                            style: const TextStyle(
-                              color: Colors.grey,
+                          decoration: BoxDecoration(
+                            color: timeBlockColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            task.timeBlock.toString().split('.').last,
+                            style: TextStyle(
+                              color: timeBlockColor,
                               fontSize: 12,
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 16.0),
-              Checkbox(
-                value: task.completed,
-                onChanged: (value) {
-                  Provider.of<TaskProvider>(context, listen: false).toggleTaskCompletion(task.id);
-                },
               ),
             ],
           ),
@@ -160,6 +162,12 @@ class TaskList extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (task.startTime != null && task.endTime != null) ...[
+                const Text('Time:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4.0),
+                Text('${task.startTime!.format(context)} - ${task.endTime!.format(context)}'),
+                const SizedBox(height: 16.0),
+              ],
               if (task.dueDate != null) ...[
                 const Text('Due Date:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4.0),
@@ -185,9 +193,7 @@ class TaskList extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Close'),
             ),
             TextButton(
@@ -216,6 +222,8 @@ class TaskList extends StatelessWidget {
     DateTime? selectedDate = task.dueDate;
     TaskPriority priority = task.priority;
     TimeBlock timeBlock = task.timeBlock;
+    TimeOfDay? startTime = task.startTime;
+    TimeOfDay? endTime = task.endTime;
     
     showDialog(
       context: context,
@@ -271,6 +279,40 @@ class TaskList extends StatelessWidget {
                             },
                           ),
                       ],
+                    ),
+                    const SizedBox(height: 16.0),
+                    const Text('Start Time:'),
+                    ListTile(
+                      title: Text(startTime?.format(context) ?? 'Select Start Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: startTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            startTime = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    const Text('End Time:'),
+                    ListTile(
+                      title: Text(endTime?.format(context) ?? 'Select End Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: endTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            endTime = picked;
+                          });
+                        }
+                      },
                     ),
                     const SizedBox(height: 16.0),
                     const Text('Priority:'),
@@ -345,6 +387,8 @@ class TaskList extends StatelessWidget {
                         projectId: task.projectId,
                         completed: task.completed,
                         createdAt: task.createdAt,
+                        startTime: startTime,
+                        endTime: endTime,
                       );
                       
                       taskProvider.updateTask(updatedTask);

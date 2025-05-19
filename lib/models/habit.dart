@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'habit.g.dart';
@@ -54,6 +55,37 @@ class Habit extends HiveObject {
 
   @HiveField(12)
   DateTime createdAt;
+  
+  @HiveField(13)
+  int? startTimeMinutes; // Store as minutes since midnight
+
+  @HiveField(14)
+  int? endTimeMinutes; // Store as minutes since midnight
+  
+  // Non-Hive fields (not stored directly)
+  TimeOfDay? get startTime => startTimeMinutes != null 
+      ? TimeOfDay(hour: startTimeMinutes! ~/ 60, minute: startTimeMinutes! % 60) 
+      : null;
+  
+  set startTime(TimeOfDay? time) {
+    if (time != null) {
+      startTimeMinutes = time.hour * 60 + time.minute;
+    } else {
+      startTimeMinutes = null;
+    }
+  }
+  
+  TimeOfDay? get endTime => endTimeMinutes != null 
+      ? TimeOfDay(hour: endTimeMinutes! ~/ 60, minute: endTimeMinutes! % 60) 
+      : null;
+  
+  set endTime(TimeOfDay? time) {
+    if (time != null) {
+      endTimeMinutes = time.hour * 60 + time.minute;
+    } else {
+      endTimeMinutes = null;
+    }
+  }
 
   Habit({
     required this.id,
@@ -69,5 +101,14 @@ class Habit extends HiveObject {
     this.currentStreak = 0,
     this.longestStreak = 0,
     required this.createdAt,
-  });
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+  }) {
+    if (startTime != null) {
+      startTimeMinutes = startTime.hour * 60 + startTime.minute;
+    }
+    if (endTime != null) {
+      endTimeMinutes = endTime.hour * 60 + endTime.minute;
+    }
+  }
 }

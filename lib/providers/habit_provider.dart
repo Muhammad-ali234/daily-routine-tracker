@@ -60,6 +60,8 @@ class HabitProvider with ChangeNotifier {
       saturday: habit.saturday,
       sunday: habit.sunday,
       createdAt: DateTime.now(),
+      startTime: habit.startTime,
+      endTime: habit.endTime,
     );
     
     await _habitsBox!.put(id, newHabit);

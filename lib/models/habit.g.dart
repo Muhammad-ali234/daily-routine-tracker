@@ -30,13 +30,15 @@ class HabitAdapter extends TypeAdapter<Habit> {
       currentStreak: fields[10] as int,
       longestStreak: fields[11] as int,
       createdAt: fields[12] as DateTime,
-    );
+    )
+      ..startTimeMinutes = fields[13] as int?
+      ..endTimeMinutes = fields[14] as int?;
   }
 
   @override
   void write(BinaryWriter writer, Habit obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -62,7 +64,11 @@ class HabitAdapter extends TypeAdapter<Habit> {
       ..writeByte(11)
       ..write(obj.longestStreak)
       ..writeByte(12)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(13)
+      ..write(obj.startTimeMinutes)
+      ..writeByte(14)
+      ..write(obj.endTimeMinutes);
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:daily_routine_tracker/widgets/tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -65,17 +66,18 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
               },
             ),
           ),
-          TabBar(
-            controller: _tabController,
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Theme.of(context).textTheme.bodyMedium!.color,
-            tabs: const [
-              Tab(text: 'All'),
-              Tab(text: 'Physical'),
-              Tab(text: 'Mental'),
-              Tab(text: 'Career'),
-            ],
-          ),
+         MyTabBarWidget(
+  controller: _tabController,
+  tabNames:const ['All', 'Physical', 'Mental', 'Career'],
+),
+// add line 
+const Divider(
+  color: Colors.black,      // Line color
+  thickness: 1,            // Line thickness
+  indent: 16,              // Start padding
+  endIndent: 16,           // End padding
+  height: 32,              // Space above and below the line
+),
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -158,6 +160,16 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
                 _buildCategoryChip(habit.category),
               ],
             ),
+            if (habit.startTime != null && habit.endTime != null) ...[
+              const SizedBox(height: 8.0),
+              Text(
+                '${habit.startTime!.format(context)} - ${habit.endTime!.format(context)}',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
             const SizedBox(height: 16.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -286,6 +298,8 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
   void _showAddHabitDialog(BuildContext context) {
     final TextEditingController habitNameController = TextEditingController();
     HabitCategory category = HabitCategory.physical;
+    TimeOfDay? startTime;
+    TimeOfDay? endTime;
     
     showDialog(
       context: context,
@@ -325,6 +339,40 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
                         );
                       }).toList(),
                     ),
+                    const SizedBox(height: 16.0),
+                    const Text('Start Time:'),
+                    ListTile(
+                      title: Text(startTime?.format(context) ?? 'Select Start Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: startTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            startTime = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    const Text('End Time:'),
+                    ListTile(
+                      title: Text(endTime?.format(context) ?? 'Select End Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: endTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            endTime = picked;
+                          });
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -344,6 +392,8 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
                         name: habitNameController.text.trim(),
                         category: category,
                         createdAt: DateTime.now(),
+                        startTime: startTime,
+                        endTime: endTime,
                       );
                       
                       habitProvider.addHabit(newHabit);
@@ -363,6 +413,8 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
   void _showEditHabitDialog(BuildContext context, Habit habit) {
     final TextEditingController habitNameController = TextEditingController(text: habit.name);
     HabitCategory category = habit.category;
+    TimeOfDay? startTime = habit.startTime;
+    TimeOfDay? endTime = habit.endTime;
     
     showDialog(
       context: context,
@@ -402,6 +454,40 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
                         );
                       }).toList(),
                     ),
+                    const SizedBox(height: 16.0),
+                    const Text('Start Time:'),
+                    ListTile(
+                      title: Text(startTime?.format(context) ?? 'Select Start Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: startTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            startTime = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    const Text('End Time:'),
+                    ListTile(
+                      title: Text(endTime?.format(context) ?? 'Select End Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: endTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            endTime = picked;
+                          });
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -430,6 +516,8 @@ class _HabitScreenState extends State<HabitScreen> with SingleTickerProviderStat
                         currentStreak: habit.currentStreak,
                         longestStreak: habit.longestStreak,
                         createdAt: habit.createdAt,
+                        startTime: startTime,
+                        endTime: endTime,
                       );
                       
                       habitProvider.updateHabit(updatedHabit);

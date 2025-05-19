@@ -1,3 +1,4 @@
+import 'package:daily_routine_tracker/widgets/tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -41,22 +42,12 @@ class _TaskScreenState extends State<TaskScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tasks'),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Theme.of(context).primaryColor,
-          unselectedLabelColor: Theme.of(context).textTheme.bodyMedium!.color,
-          tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Today'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Completed'),
-          ],
-        ),
-      ),
       body: Column(
         children: [
+          MyTabBarWidget(
+            controller: _tabController,
+            tabNames: const ['All', 'Today', 'Upcoming', 'Completed'],
+          ),
           _buildSearchAndFilters(),
           Expanded(
             child: TabBarView(
@@ -329,6 +320,8 @@ class _TaskScreenState extends State<TaskScreen> with SingleTickerProviderStateM
     TimeBlock timeBlock = TimeBlock.peakProductivity;
     EnergyLevel energyLevel = EnergyLevel.medium;
     String? selectedProjectId;
+    TimeOfDay? startTime;
+    TimeOfDay? endTime;
     
     showDialog(
       context: context,
@@ -470,6 +463,40 @@ class _TaskScreenState extends State<TaskScreen> with SingleTickerProviderStateM
                         );
                       },
                     ),
+                    const SizedBox(height: 16.0),
+                    const Text('Start Time:'),
+                    ListTile(
+                      title: Text(startTime?.format(context) ?? 'Select Start Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: startTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            startTime = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    const Text('End Time:'),
+                    ListTile(
+                      title: Text(endTime?.format(context) ?? 'Select End Time'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: endTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            endTime = picked;
+                          });
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -493,6 +520,8 @@ class _TaskScreenState extends State<TaskScreen> with SingleTickerProviderStateM
                         energyRequired: energyLevel,
                         projectId: selectedProjectId,
                         createdAt: DateTime.now(),
+                        startTime: startTime,
+                        endTime: endTime,
                       );
                       
                       taskProvider.addTask(task);

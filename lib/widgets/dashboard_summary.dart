@@ -56,14 +56,7 @@ class DashboardSummary extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colorScheme.primary,
-                colorScheme.primary.withOpacity(0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppTheme.primaryColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -89,7 +82,7 @@ class DashboardSummary extends StatelessWidget {
                           size: 28,
                           color: colorScheme.onPrimary,
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Text(
                           'Dashboard Overview',
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -116,30 +109,30 @@ class DashboardSummary extends StatelessWidget {
                     _buildStatItem(
                       context: context,
                       icon: Icons.check_circle_rounded,
-                      iconColor: Colors.greenAccent,
+                      iconColor: AppTheme.accentColor,
                       label: 'Tasks',
                       value: '$completedTodayTasks/$totalTodayTasks',
                     ),
                     _buildStatItem(
                       context: context,
                       icon: Icons.work_rounded,
-                      iconColor: Colors.amberAccent,
+                      iconColor: AppTheme.mediumPriorityColor,
                       label: 'Projects',
                       value: '$activeProjects',
                     ),
                     _buildStatItem(
                       context: context,
                       icon: Icons.repeat_rounded,
-                      iconColor: Colors.lightBlueAccent,
+                      iconColor: AppTheme.careerColor,
                       label: 'Habits',
                       value: '$completedHabits/$totalHabits',
                     ),
                     _buildStatItem(
                       context: context,
                       icon: Icons.emoji_events_rounded,
-                      iconColor: Colors.orangeAccent,
+                      iconColor: AppTheme.morningColor,
                       label: 'Streaks',
-                      value: '${highestStreak} days',
+                      value: '$highestStreak days',
                     ),
                   ],
                 ),

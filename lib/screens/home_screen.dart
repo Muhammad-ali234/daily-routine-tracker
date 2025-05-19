@@ -15,7 +15,11 @@ import 'habit_screen.dart';
 import 'analytics_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  static final GlobalKey<_HomeScreenState> globalKey = GlobalKey<_HomeScreenState>();
   const HomeScreen({Key? key}) : super(key: key);
+
+  static _HomeScreenState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_HomeScreenState>();
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -25,6 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
   bool _isDesktop = false;
+
+  void navigateToTab(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _pageController.jumpToPage(index);
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -36,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppTheme.primaryColor,
         elevation: 0,
         title: const Row(
           children: [
@@ -88,6 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _selectedIndex = index;
             });
           },
+          selectedIconTheme: const IconThemeData(color: Colors.white),
+          unselectedIconTheme: const IconThemeData(color: Colors.black),
           destinations: const [
             NavigationRailDestination(
               icon: Icon(Icons.dashboard_outlined),
@@ -421,6 +435,11 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required VoidCallback onViewAll,
   }) {
+    int? tabIndex;
+    if (title.contains('Task') || title.contains('Schedule')) tabIndex = 1;
+    if (title.contains('Habit')) tabIndex = 3;
+    if (title.contains('Project')) tabIndex = 2;
+    if (title.contains('Analytics')) tabIndex = 4;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -440,7 +459,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         TextButton.icon(
-          onPressed: onViewAll,
+          onPressed: tabIndex != null
+              ? () => HomeScreen.globalKey.currentState?.navigateToTab(tabIndex!)
+              : onViewAll,
           icon: const Icon(Icons.chevron_right),
           label: const Text('View All'),
           style: TextButton.styleFrom(

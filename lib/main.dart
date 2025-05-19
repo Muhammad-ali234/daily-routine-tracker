@@ -13,6 +13,9 @@ import 'models/user.dart';
 import 'models/task.dart';
 import 'models/project.dart';
 import 'models/habit.dart';
+import 'screens/home_screen.dart';
+import 'utils/icon_generator.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +56,9 @@ void main() async {
   await Hive.openBox<Project>('projects');
   await Hive.openBox<Habit>('habits');
   
+  // Generate the app icon
+  await IconGenerator.generateAppIcon();
+  
   runApp(
     MultiProvider(
       providers: [
@@ -65,4 +71,27 @@ void main() async {
       child: const ProductivityApp(),
     ),
   );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => HabitProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Daily Routine Tracker',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        home: const HomeScreen(),
+      ),
+    );
+  }
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:daily_routine_tracker/widgets/tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,6 @@ import '../providers/habit_provider.dart';
 import '../models/task.dart';
 import '../models/project.dart';
 import '../models/habit.dart';
-import '../widgets/app_drawer.dart';
 import '../theme/app_theme.dart';
 
 class AnalyticsScreen extends StatefulWidget {
@@ -42,14 +42,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
     return Scaffold(
       appBar: AppBar(
         title: const Text('Analytics'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Tasks'),
-            Tab(text: 'Projects'),
-            Tab(text: 'Habits'),
-          ],
-        ),
+        bottom:  MyTabBarWidget(
+  controller: _tabController,
+  tabNames: const['Tasks', 'Projects', 'Habits'],
+
+),
+// add line 
+
         actions: [
           PopupMenuButton<TimeRange>(
             initialValue: _selectedTimeRange,
@@ -75,7 +74,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           ),
         ],
       ),
-      drawer: const AppDrawer(),
+      // drawer: const AppDrawer(),
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -483,9 +482,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
 
   LineChartData _buildCompletionTrendData(List<MapEntry<DateTime, int>> trend) {
     return LineChartData(
-      gridData: FlGridData(show: false),
+      gridData: const FlGridData(show: false),
       titlesData: FlTitlesData(
-        leftTitles: AxisTitles(
+        leftTitles: const AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 30,
@@ -506,10 +505,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
             },
           ),
         ),
-        rightTitles: AxisTitles(
+        rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
-        topTitles: AxisTitles(
+        topTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
       ),
@@ -523,7 +522,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
           color: AppTheme.primaryColor,
           barWidth: 3,
           isStrokeCapRound: true,
-          dotData: FlDotData(show: false),
+          dotData: const FlDotData(show: false),
           belowBarData: BarAreaData(
             show: true,
             color: AppTheme.primaryColor.withOpacity(0.1),
@@ -567,9 +566,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
     return BarChartData(
       alignment: BarChartAlignment.spaceAround,
       maxY: tasksByTimeBlock.values.fold(0, max) + 1,
-      barTouchData: BarTouchData(enabled: false),
+      barTouchData: const BarTouchData(enabled: false),
       titlesData: FlTitlesData(
-        leftTitles: AxisTitles(
+        leftTitles: const AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 30,
@@ -593,10 +592,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
             reservedSize: 42,
           ),
         ),
-        rightTitles: AxisTitles(
+        rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
-        topTitles: AxisTitles(
+        topTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
       ),

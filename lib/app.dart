@@ -27,7 +27,7 @@ class ProductivityApp extends StatelessWidget {
                 body: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 16),
                       Text('Initializing...')
