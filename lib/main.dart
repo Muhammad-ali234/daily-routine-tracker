@@ -15,14 +15,14 @@ import 'models/habit.dart';
 import 'screens/home_screen.dart';
 import 'utils/icon_generator.dart';
 import 'services/notification_service.dart';
-
+import 'services/notification_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Hive
   await Hive.initFlutter();
-  
+
   // For development/testing: Clear existing boxes to avoid type adapter conflicts
   // This is useful during development when the model schema changes frequently
   // Comment out or remove this in production
@@ -30,10 +30,10 @@ void main() async {
   // await Hive.deleteBoxFromDisk('tasks');
   // await Hive.deleteBoxFromDisk('projects');
   // await Hive.deleteBoxFromDisk('habits');
-  
+
   // Register Hive adapters for all models
   // Make sure to register them in the correct order with proper typeIds
-  
+
   // Register enum adapters first (these are auto-generated)
   Hive.registerAdapter(TaskStatusAdapter());
   Hive.registerAdapter(TaskPriorityAdapter());
@@ -42,26 +42,26 @@ void main() async {
   Hive.registerAdapter(HabitCategoryAdapter());
   Hive.registerAdapter(ProjectStatusAdapter());
   Hive.registerAdapter(ProjectCategoryAdapter());
-  
+
   // Then register model adapters
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(ProjectAdapter());
   Hive.registerAdapter(HabitAdapter());
-  
-  
+
   // Open boxes
   await Hive.openBox<User>('users');
   await Hive.openBox<Task>('tasks');
   await Hive.openBox<Project>('projects');
   await Hive.openBox<Habit>('habits');
-  
+
   // Initialize notification service
-  await NotificationService().init();
-  
-  // Generate the app icon
-  await IconGenerator.generateAppIcon();
-  
+  final notificationService = NotificationService();
+  await notificationService.init();
+
+  // // Generate the app icon
+  // await IconGenerator.generateAppIcon();
+
   runApp(
     MultiProvider(
       providers: [
@@ -70,31 +70,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
         ChangeNotifierProvider(create: (_) => HabitProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationManager()),
       ],
       child: const ProductivityApp(),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => TaskProvider()),
-        ChangeNotifierProvider(create: (_) => HabitProvider()),
-        ChangeNotifierProvider(create: (_) => ProjectProvider()),
-      ],
-      child: MaterialApp(
-        title: 'Daily Routine Tracker',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-        ),
-        home: const HomeScreen(),
-      ),
-    );
-  }
 }

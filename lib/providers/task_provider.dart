@@ -26,6 +26,11 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Public method to reload tasks (used after import/clear data)
+  void loadTasks() {
+    _loadTasks();
+  }
+
   List<Task> getTodayTasks() {
     final now = DateTime.now();
     return _tasks.where((task) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:badges/badges.dart' as badges;
 
 import '../providers/task_provider.dart';
 import '../providers/habit_provider.dart';
@@ -9,10 +10,13 @@ import '../widgets/dashboard_summary.dart';
 import '../widgets/task_list.dart';
 import '../widgets/habit_tracker.dart';
 import '../theme/app_theme.dart';
+import '../services/notification_manager.dart';
 import 'task_screen.dart';
 import 'project_screen.dart';
 import 'habit_screen.dart';
 import 'analytics_screen.dart';
+import 'setting_screen.dart';
+import 'notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static final GlobalKey<_HomeScreenState> globalKey = GlobalKey<_HomeScreenState>();
@@ -34,6 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
       _pageController.jumpToPage(index);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Update notification count every time the screen is shown
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<NotificationManager>(context, listen: false).updateNotificationCount();
     });
   }
 
@@ -66,12 +79,24 @@ class _HomeScreenState extends State<HomeScreen> {
               // TODO: Implement search functionality
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // TODO: Implement notifications
+          Consumer<NotificationManager>(
+            builder: (context, notificationManager, child) {
+              return badges.Badge(
+                position: badges.BadgePosition.topEnd(top: 0, end: 3),
+                showBadge: notificationManager.notificationCount > 0,
+                badgeContent: Text(
+                  notificationManager.notificationCount.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.notifications),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/notifications');
+                  },
+                  tooltip: 'Notifications',
+                ),
+              );
             },
-            tooltip: 'Notifications',
           ),
           const SizedBox(width: 8),
           CircleAvatar(
@@ -102,31 +127,65 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           selectedIconTheme: const IconThemeData(color: Colors.white),
           unselectedIconTheme: const IconThemeData(color: Colors.black),
-          destinations: const [
-            NavigationRailDestination(
+          destinations: [
+            const NavigationRailDestination(
               icon: Icon(Icons.dashboard_outlined),
               selectedIcon: Icon(Icons.dashboard),
               label: Text('Dashboard'),
             ),
-            NavigationRailDestination(
+            const NavigationRailDestination(
               icon: Icon(Icons.check_circle_outline),
               selectedIcon: Icon(Icons.check_circle),
               label: Text('Tasks'),
             ),
-            NavigationRailDestination(
+            const NavigationRailDestination(
               icon: Icon(Icons.work_outline),
               selectedIcon: Icon(Icons.work),
               label: Text('Projects'),
             ),
-            NavigationRailDestination(
+            const NavigationRailDestination(
               icon: Icon(Icons.repeat_outlined),
               selectedIcon: Icon(Icons.repeat),
               label: Text('Habits'),
             ),
-            NavigationRailDestination(
+            const NavigationRailDestination(
               icon: Icon(Icons.analytics_outlined),
               selectedIcon: Icon(Icons.analytics),
               label: Text('Analytics'),
+            ),
+            NavigationRailDestination(
+              icon: Consumer<NotificationManager>(
+                builder: (context, notificationManager, child) {
+                  return badges.Badge(
+                    position: badges.BadgePosition.topEnd(top: -12, end: -12),
+                    showBadge: notificationManager.notificationCount > 0,
+                    badgeContent: Text(
+                      notificationManager.notificationCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    child: const Icon(Icons.notifications_outlined),
+                  );
+                },
+              ),
+              selectedIcon: Consumer<NotificationManager>(
+                builder: (context, notificationManager, child) {
+                  return badges.Badge(
+                    position: badges.BadgePosition.topEnd(top: -12, end: -12),
+                    showBadge: notificationManager.notificationCount > 0,
+                    badgeContent: Text(
+                      notificationManager.notificationCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    child: const Icon(Icons.notifications),
+                  );
+                },
+              ),
+              label: const Text('Notifications'),
+            ),
+            const NavigationRailDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings),
+              label: Text('Settings'),
             ),
           ],
         ),
@@ -142,6 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const ProjectScreen(),
               const HabitScreen(),
               const AnalyticsScreen(),
+              const NotificationScreen(),
+              const SettingsScreen(),
             ],
           ),
         ),
@@ -166,6 +227,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const ProjectScreen(),
               const HabitScreen(),
               const AnalyticsScreen(),
+              const NotificationScreen(),
+              const SettingsScreen(),
             ],
           ),
         ),
@@ -181,31 +244,65 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           });
         },
-          destinations: const [
-            NavigationDestination(
+          destinations: [
+            const NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),
               selectedIcon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.check_circle_outline),
               selectedIcon: Icon(Icons.check_circle),
             label: 'Tasks',
           ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.work_outline),
               selectedIcon: Icon(Icons.work),
             label: 'Projects',
           ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.repeat_outlined),
               selectedIcon: Icon(Icons.repeat),
               label: 'Habits',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.analytics_outlined),
               selectedIcon: Icon(Icons.analytics),
               label: 'Analytics',
+            ),
+            NavigationDestination(
+              icon: Consumer<NotificationManager>(
+                builder: (context, notificationManager, child) {
+                  return badges.Badge(
+                    position: badges.BadgePosition.topEnd(top: -8, end: -8),
+                    showBadge: notificationManager.notificationCount > 0,
+                    badgeContent: Text(
+                      notificationManager.notificationCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    child: const Icon(Icons.notifications_outlined),
+                  );
+                },
+              ),
+              selectedIcon: Consumer<NotificationManager>(
+                builder: (context, notificationManager, child) {
+                  return badges.Badge(
+                    position: badges.BadgePosition.topEnd(top: -8, end: -8),
+                    showBadge: notificationManager.notificationCount > 0,
+                    badgeContent: Text(
+                      notificationManager.notificationCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    child: const Icon(Icons.notifications),
+                  );
+                },
+              ),
+              label: 'Notifications',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings),
+              label: 'Settings',
             ),
           ],
         ),

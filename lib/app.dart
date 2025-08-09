@@ -8,13 +8,43 @@ import 'screens/habit_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/setting_screen.dart';
-import 'screens/notification_test_screen.dart';
+import 'screens/notification_screen.dart';
 import 'theme/app_theme.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
+import 'services/habit_monitor_service.dart';
+import 'services/notification_manager.dart';
 
-class ProductivityApp extends StatelessWidget {
+class ProductivityApp extends StatefulWidget {
   const ProductivityApp({Key? key}) : super(key: key);
+
+  @override
+  State<ProductivityApp> createState() => _ProductivityAppState();
+}
+
+class _ProductivityAppState extends State<ProductivityApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize habit monitor service after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_navigatorKey.currentContext != null) {
+        HabitMonitorService().init(_navigatorKey.currentContext!);
+        
+        // Initialize notification count
+        NotificationManager().updateNotificationCount();
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    HabitMonitorService().dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +76,7 @@ class ProductivityApp extends StatelessWidget {
           debugPrint('User: ${userProvider.user}');
 
           return MaterialApp(
+            navigatorKey: _navigatorKey,
             title: 'Deep Work Planner',
             theme: AppTheme.lightTheme.copyWith(
               primaryColor: primaryColor,
@@ -72,7 +103,7 @@ class ProductivityApp extends StatelessWidget {
               '/analytics': (context) => const AnalyticsScreen(),
               '/profile': (context) => const ProfileScreen(),
               '/settings': (context) => const SettingsScreen(),
-              '/notifications': (context) => const NotificationTestScreen(),
+              '/notifications': (context) => const NotificationScreen(),
             },
             onUnknownRoute: (settings) => MaterialPageRoute(
               builder: (context) => const Scaffold(

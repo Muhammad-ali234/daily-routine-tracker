@@ -22,6 +22,11 @@ class ProjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Public method to reload projects (used after import/clear data)
+  void loadProjects() {
+    _loadProjects();
+  }
+
   List<Project> get projects => _projects;
 
   List<Project> getProjectsByCategory(ProjectCategory category) {

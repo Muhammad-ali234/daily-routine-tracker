@@ -4,6 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/app_theme.dart';
 import '../providers/theme_provider.dart';
+import '../services/data_service.dart';
+import '../providers/task_provider.dart';
+import '../providers/habit_provider.dart';
+import '../providers/project_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -18,6 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _reminderTime = '08:00';
   bool _weeklyReportEnabled = true;
   String _weeklyReportDay = 'Sunday';
+  bool _isLoading = false;
   
   @override
   void initState() {
@@ -48,135 +53,134 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: ListView(
-        children: [
-          const _SectionHeader(title: 'Appearance'),
-          _buildThemeSelector(),
-          const Divider(),
-          
-          const _SectionHeader(title: 'Notifications'),
-          SwitchListTile(
-            title: const Text('Enable Notifications'),
-            subtitle: const Text('Receive daily reminders for tasks and habits'),
-            value: _notificationsEnabled,
-            onChanged: (value) {
-              setState(() {
-                _notificationsEnabled = value;
-                _savePreferences();
-              });
-            },
-          ),
-          ListTile(
-            title: const Text('Daily Reminder Time'),
-            subtitle: Text(_reminderTime),
-            trailing: const Icon(Icons.access_time),
-            enabled: _notificationsEnabled,
-            onTap: () async {
-              if (!_notificationsEnabled) return;
-              
-              final TimeOfDay? picked = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay(
-                  hour: int.parse(_reminderTime.split(':')[0]),
-                  minute: int.parse(_reminderTime.split(':')[1]),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              children: [
+                const _SectionHeader(title: 'Appearance'),
+                _buildThemeSelector(),
+                const Divider(),
+                
+                const _SectionHeader(title: 'Notifications'),
+                SwitchListTile(
+                  title: const Text('Enable Notifications'),
+                  subtitle: const Text('Receive daily reminders for tasks and habits'),
+                  value: _notificationsEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      _notificationsEnabled = value;
+                      _savePreferences();
+                    });
+                  },
                 ),
-              );
-              
-              if (picked != null) {
-                setState(() {
-                  _reminderTime = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-                  _savePreferences();
-                });
-              }
-            },
-          ),
-          ListTile(
-            title: const Text('Test Notifications'),
-            subtitle: const Text('Test and manage app notifications'),
-            leading: const Icon(Icons.notifications_active),
-            onTap: () {
-              Navigator.of(context).pushNamed('/notifications');
-            },
-          ),
-          const Divider(),
-          
-          const _SectionHeader(title: 'Reports'),
-          SwitchListTile(
-            title: const Text('Weekly Report'),
-            subtitle: const Text('Receive a weekly summary of your progress'),
-            value: _weeklyReportEnabled,
-            onChanged: (value) {
-              setState(() {
-                _weeklyReportEnabled = value;
-                _savePreferences();
-              });
-            },
-          ),
-          ListTile(
-            title: const Text('Weekly Report Day'),
-            subtitle: Text(_weeklyReportDay),
-            enabled: _weeklyReportEnabled,
-            onTap: () {
-              if (!_weeklyReportEnabled) return;
-              
-              _showDayPicker();
-            },
-          ),
-          const Divider(),
-          
-          const _SectionHeader(title: 'Data Management'),
-          ListTile(
-            title: const Text('Export Data'),
-            leading: const Icon(Icons.download),
-            onTap: () {
-              // TODO: Implement data export
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Export functionality coming soon')),
-              );
-            },
-          ),
-          ListTile(
-            title: const Text('Import Data'),
-            leading: const Icon(Icons.upload),
-            onTap: () {
-              // TODO: Implement data import
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Import functionality coming soon')),
-              );
-            },
-          ),
-          ListTile(
-            title: const Text('Clear All Data'),
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            onTap: () {
-              _showClearDataConfirmationDialog();
-            },
-          ),
-          const Divider(),
-          
-          const _SectionHeader(title: 'About'),
-          const ListTile(
-            title: Text('App Version'),
-            subtitle: Text('1.0.0'),
-            leading: Icon(Icons.info),
-          ),
-          ListTile(
-            title: const Text('Privacy Policy'),
-            leading: const Icon(Icons.privacy_tip),
-            onTap: () {
-              // TODO: Navigate to privacy policy
-            },
-          ),
-          ListTile(
-            title: const Text('Terms of Service'),
-            leading: const Icon(Icons.description),
-            onTap: () {
-              // TODO: Navigate to terms of service
-            },
-          ),
-          const SizedBox(height: 24.0),
-        ],
-      ),
+                ListTile(
+                  title: const Text('Daily Reminder Time'),
+                  subtitle: Text(_reminderTime),
+                  trailing: const Icon(Icons.access_time),
+                  enabled: _notificationsEnabled,
+                  onTap: () async {
+                    if (!_notificationsEnabled) return;
+                    
+                    final TimeOfDay? picked = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay(
+                        hour: int.parse(_reminderTime.split(':')[0]),
+                        minute: int.parse(_reminderTime.split(':')[1]),
+                      ),
+                    );
+                    
+                    if (picked != null) {
+                      setState(() {
+                        _reminderTime = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                        _savePreferences();
+                      });
+                    }
+                  },
+                ),
+                ListTile(
+                  title: const Text('Test Notifications'),
+                  subtitle: const Text('Test and manage app notifications'),
+                  leading: const Icon(Icons.notifications_active),
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/notifications');
+                  },
+                ),
+                const Divider(),
+                
+                const _SectionHeader(title: 'Reports'),
+                SwitchListTile(
+                  title: const Text('Weekly Report'),
+                  subtitle: const Text('Receive a weekly summary of your progress'),
+                  value: _weeklyReportEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      _weeklyReportEnabled = value;
+                      _savePreferences();
+                    });
+                  },
+                ),
+                ListTile(
+                  title: const Text('Weekly Report Day'),
+                  subtitle: Text(_weeklyReportDay),
+                  enabled: _weeklyReportEnabled,
+                  onTap: () {
+                    if (!_weeklyReportEnabled) return;
+                    
+                    _showDayPicker();
+                  },
+                ),
+                const Divider(),
+                
+                const _SectionHeader(title: 'Data Management'),
+                ListTile(
+                  title: const Text('Export Data'),
+                  leading: const Icon(Icons.download),
+                  subtitle: const Text('Save all your data to a file'),
+                  onTap: () async {
+                    await _exportData();
+                  },
+                ),
+                ListTile(
+                  title: const Text('Import Data'),
+                  leading: const Icon(Icons.upload),
+                  subtitle: const Text('Load data from a previously exported file'),
+                  onTap: () async {
+                    await _importData();
+                  },
+                ),
+                ListTile(
+                  title: const Text('Clear All Data'),
+                  leading: const Icon(Icons.delete_forever, color: Colors.red),
+                  subtitle: const Text('Delete all your tasks, habits and projects'),
+                  onTap: () {
+                    _showClearDataConfirmationDialog();
+                  },
+                ),
+                const Divider(),
+                
+                const _SectionHeader(title: 'About'),
+                const ListTile(
+                  title: Text('App Version'),
+                  subtitle: Text('1.0.0'),
+                  leading: Icon(Icons.info),
+                ),
+                ListTile(
+                  title: const Text('Privacy Policy'),
+                  leading: const Icon(Icons.privacy_tip),
+                  onTap: () {
+                    // TODO: Navigate to privacy policy
+                  },
+                ),
+                ListTile(
+                  title: const Text('Terms of Service'),
+                  leading: const Icon(Icons.description),
+                  onTap: () {
+                    // TODO: Navigate to terms of service
+                  },
+                ),
+                const SizedBox(height: 24.0),
+              ],
+            ),
     );
   }
 
@@ -218,6 +222,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return 'Light';
       case ThemeMode.dark:
         return 'Dark';
+    }
+  }
+
+  Future<void> _exportData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final success = await DataService.exportData(context);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data exported successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to export data')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  
+  Future<void> _importData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final success = await DataService.importData(context);
+      
+      if (success) {
+        // Refresh providers to update UI
+        Provider.of<TaskProvider>(context, listen: false).loadTasks();
+        Provider.of<HabitProvider>(context, listen: false).loadHabits();
+        Provider.of<ProjectProvider>(context, listen: false).loadProjects();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data imported successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to import data or no file selected')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -384,13 +449,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                // TODO: Implement data clearing
-                _prefs.clear();
+              onPressed: () async {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('All data has been cleared')),
-                );
+                
+                setState(() {
+                  _isLoading = true;
+                });
+                
+                try {
+                  final success = await DataService.clearAllData();
+                  
+                  if (success) {
+                    // Refresh providers to update UI
+                    Provider.of<TaskProvider>(context, listen: false).loadTasks();
+                    Provider.of<HabitProvider>(context, listen: false).loadHabits();
+                    Provider.of<ProjectProvider>(context, listen: false).loadProjects();
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('All data has been cleared')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Failed to clear data')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                } finally {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,

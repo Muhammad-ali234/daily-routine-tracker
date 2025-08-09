@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 
@@ -10,7 +11,7 @@ class IconGenerator {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     final size = const Size(1024, 1024);
-    
+
     // Draw background with gradient
     final paint = Paint()
       ..shader = const LinearGradient(
@@ -83,7 +84,7 @@ class IconGenerator {
     final dotPaint = Paint()
       ..color = const Color(0xFF2196F3)
       ..style = PaintingStyle.fill;
-    
+
     for (var i = 0; i < 12; i++) {
       final angle = (i * 30) * (pi / 180);
       final x = size.width / 2 + (size.width * 0.4) * cos(angle);
@@ -97,46 +98,60 @@ class IconGenerator {
 
     // Convert to image
     final picture = recorder.endRecording();
-    final image = await picture.toImage(size.width.toInt(), size.height.toInt());
+    final image =
+        await picture.toImage(size.width.toInt(), size.height.toInt());
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final pngBytes = byteData!.buffer.asUint8List();
 
     // Convert to ICO
     final imageData = img.decodeImage(pngBytes);
     if (imageData != null) {
-      // Create different sizes for the ICO
-      final sizes = [16, 32, 48, 64, 128, 256];
-      final images = <img.Image>[];
-      
-      for (final size in sizes) {
-        final resized = img.copyResize(
-          imageData,
-          width: size,
-          height: size,
-          interpolation: img.Interpolation.linear,
-        );
-        images.add(resized);
-      }
+      try {
+        // Create different sizes for the ICO
+        final sizes = [16, 32, 48, 64, 128, 256];
+        final images = <img.Image>[];
 
-      // Save as ICO
-      final icoData = img.encodeIco(images[0]); // Use the largest image for now
-      
-      // Save to Windows resources directory
-      final windowsResourceDir = Directory('windows/runner/resources');
-      if (await windowsResourceDir.exists()) {
-        final windowsIconFile = File('${windowsResourceDir.path}/app_icon.ico');
-        await windowsIconFile.writeAsBytes(icoData);
-        print('Icon saved to: ${windowsIconFile.path}');
-        
-        // Verify the file was created
-        if (await windowsIconFile.exists()) {
-          print('Icon file successfully created and saved');
-        } else {
-          print('Failed to create icon file');
+        for (final size in sizes) {
+          final resized = img.copyResize(
+            imageData,
+            width: size,
+            height: size,
+            interpolation: img.Interpolation.linear,
+          );
+          images.add(resized);
         }
-      } else {
-        print('Windows resources directory not found at: ${windowsResourceDir.path}');
+
+        // Save as ICO
+        final icoData =
+            img.encodeIco(images[0]); // Use the largest image for now
+
+        // Only save to file system on supported platforms (not web)
+        if (!kIsWeb) {
+          // Save to Windows resources directory
+          final windowsResourceDir = Directory('windows/runner/resources');
+          if (await windowsResourceDir.exists()) {
+            final windowsIconFile =
+                File('${windowsResourceDir.path}/app_icon.ico');
+            await windowsIconFile.writeAsBytes(icoData);
+            print('Icon saved to: ${windowsIconFile.path}');
+
+            // Verify the file was created
+            if (await windowsIconFile.exists()) {
+              print('Icon file successfully created and saved');
+            } else {
+              print('Failed to create icon file');
+            }
+          } else {
+            print(
+                'Windows resources directory not found at: ${windowsResourceDir.path}');
+          }
+        } else {
+          print(
+              'Icon generation completed (web platform - no file system access)');
+        }
+      } catch (e) {
+        print('Error processing icon: $e');
       }
     }
   }
-} 
+}

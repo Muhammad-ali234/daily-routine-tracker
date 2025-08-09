@@ -34,6 +34,11 @@ class HabitProvider with ChangeNotifier {
     }
   }
 
+  // Public method to reload habits (used after import/clear data)
+  void loadHabits() {
+    _loadHabits();
+  }
+
   List<Habit> get habits => _habits;
 
   List<Habit> getHabitsByCategory(HabitCategory category) {
@@ -164,6 +169,13 @@ class HabitProvider with ChangeNotifier {
       
       await _habitsBox!.put(id, habit);
       
+      // Update the in-memory list to immediately reflect changes
+      final index = _habits.indexWhere((h) => h.id == id);
+      if (index != -1) {
+        _habits[index] = habit;
+        notifyListeners(); // Notify UI to rebuild immediately
+      }
+      
       // Cancel and reschedule notifications if the day pattern changed
       if (habit.startTime != null) {
         // If the habit was toggled off for the day, cancel that day's notification
@@ -172,7 +184,7 @@ class HabitProvider with ChangeNotifier {
         await _notificationService.scheduleWeeklyHabitNotifications(habit);
       }
       
-      _loadHabits();
+      // No need to _loadHabits() since we already updated _habits and notified listeners
     }
   }
   
